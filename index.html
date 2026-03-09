@@ -1,30 +1,49 @@
-#include <stdio.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
 
-void bubbleSort(int arr[], int n) {
-    int i, j, temp;
-    for (i = 0; i < n-1; i++) {
-        for (j = 0; j < n-i-1; j++) {
-            if (arr[j] > arr[j+1]) {
-                // Swap arr[j] and arr[j+1]
-                temp = arr[j];
-                arr[j] = arr[j+1];
-                arr[j+1] = temp;
+using namespace std;
+
+// 氣泡排序函數
+void bubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    bool swapped;
+
+    for (int i = 0; i < n - 1; i++) {
+        swapped = false;
+        cout << "第 " << i + 1 << " 輪開始：" << endl;
+
+        // 最後 i 個元素已經排好了，不需要再比
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                // 交換位置
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+                
+                // 印出當前進度
+                for (int x : arr) cout << x << " ";
+                cout << "(交換了 " << arr[j+1] << " 和 " << arr[j] << ")" << endl;
             }
         }
+
+        // 如果某一輪完全沒有交換，代表已經排好了，提前結束
+        if (!swapped) break;
+        cout << "--------------------" << endl;
     }
 }
 
-void printArray(int arr[], int n) {
-    for (int i = 0; i < n; i++)
-        printf("%d ", arr[i]);
-    printf("\n");
-}
-
 int main() {
-    int arr[] = {64, 34, 25, 12, 22, 11, 90};
-    int n = sizeof(arr)/sizeof(arr[0]);
-    bubbleSort(arr, n);
-    printf("Sorted array: \n");
-    printArray(arr, n);
+    vector<int> data = {64, 34, 25, 12, 22, 11, 90};
+
+    cout << "原始陣列: ";
+    for (int x : data) cout << x << " ";
+    cout << "\n\n";
+
+    bubbleSort(data);
+
+    cout << "\n排序結果: ";
+    for (int x : data) cout << x << " ";
+    cout << endl;
+
     return 0;
 }
