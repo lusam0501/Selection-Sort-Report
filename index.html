@@ -1,49 +1,68 @@
-#include <iostream>
-#include <vector>
-#include <algorithm>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>氣泡排序法視覺化</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; }
+        .container { margin-top: 50px; display: flex; align-items: flex-end; height: 300px; gap: 5px; }
+        .bar { width: 30px; background-color: #3498db; transition: 0.2s all; text-align: center; color: white; font-size: 12px; border-radius: 3px 3px 0 0; }
+        .comparing { background-color: #e74c3c !important; }
+        .sorted { background-color: #2ecc71 !important; }
+        button { margin-top: 30px; padding: 10px 20px; font-size: 16px; cursor: pointer; background: #2c3e50; color: white; border: none; border-radius: 5px; }
+        button:hover { background: #34495e; }
+    </style>
+</head>
+<body>
 
-using namespace std;
+    <h2>氣泡排序 (Bubble Sort) 視覺化</h2>
+    <div class="container" id="visualizer"></div>
+    <button onclick="startSort()">開始排序</button>
 
-// 氣泡排序函數
-void bubbleSort(vector<int>& arr) {
-    int n = arr.size();
-    bool swapped;
+    <script>
+        const data = [64, 34, 25, 12, 22, 11, 90, 45, 72];
+        const container = document.getElementById('visualizer');
 
-    for (int i = 0; i < n - 1; i++) {
-        swapped = false;
-        cout << "第 " << i + 1 << " 輪開始：" << endl;
-
-        // 最後 i 個元素已經排好了，不需要再比
-        for (int j = 0; j < n - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                // 交換位置
-                swap(arr[j], arr[j + 1]);
-                swapped = true;
+        // 初始化渲染
+        function render(highlightIndices = [], sortedIndex = -1) {
+            container.innerHTML = '';
+            data.forEach((val, i) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${val * 3}px`;
+                bar.innerText = val;
                 
-                // 印出當前進度
-                for (int x : arr) cout << x << " ";
-                cout << "(交換了 " << arr[j+1] << " 和 " << arr[j] << ")" << endl;
-            }
+                if (highlightIndices.includes(i)) bar.classList.add('comparing');
+                if (sortedIndex !== -1 && i >= sortedIndex) bar.classList.add('sorted');
+                
+                container.appendChild(bar);
+            });
         }
 
-        // 如果某一輪完全沒有交換，代表已經排好了，提前結束
-        if (!swapped) break;
-        cout << "--------------------" << endl;
-    }
-}
+        // 延遲函式 (讓視覺化有動畫效果)
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-int main() {
-    vector<int> data = {64, 34, 25, 12, 22, 11, 90};
+        async function startSort() {
+            let n = data.length;
+            for (let i = 0; i < n - 1; i++) {
+                for (let j = 0; j < n - i - 1; j++) {
+                    // 1. 標示正在比較的兩個氣泡
+                    render([j, j + 1], n - i);
+                    await sleep(300);
 
-    cout << "原始陣列: ";
-    for (int x : data) cout << x << " ";
-    cout << "\n\n";
+                    if (data[j] > data[j + 1]) {
+                        // 2. 交換數據
+                        [data[j], data[j + 1]] = [data[j + 1], data[j]];
+                        render([j, j + 1], n - i);
+                        await sleep(300);
+                    }
+                }
+            }
+            render([], 0); // 全部變綠色表示完成
+            alert("排序完成！");
+        }
 
-    bubbleSort(data);
-
-    cout << "\n排序結果: ";
-    for (int x : data) cout << x << " ";
-    cout << endl;
-
-    return 0;
-}
+        render();
+    </script>
+</body>
+</html>
