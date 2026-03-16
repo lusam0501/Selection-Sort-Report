@@ -57,6 +57,7 @@
         <button id="next">下一步</button>
         <button id="reset">重置</button>
         <button id="random">亂數陣列</button>
+        <button id="home">回首頁</button>
     </div>
     <div id="status">準備開始</div>
 
@@ -212,6 +213,9 @@
         document.getElementById('prev').addEventListener('click', prev);
         document.getElementById('reset').addEventListener('click', reset);
         document.getElementById('random').addEventListener('click', randomArray);
+        document.getElementById('home').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
     </script>
 </body>
 </html>
