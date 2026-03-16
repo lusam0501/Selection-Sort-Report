@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selection Sort 示範</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .bar {
+            width: 40px;
+            margin: 0 2px;
+            background-color: #3498db;
+            transition: height 0.3s;
+        }
+        .bar.comparing {
+            background-color: #e74c3c;
+        }
+        .bar.swapping {
+            background-color: #f39c12;
+        }
+        .bar.sorted {
+            background-color: #27ae60;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #status {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Selection Sort 示範</h1>
+    <div class="array-container" id="array-container"></div>
+    <div class="controls">
+        <button id="start">開始</button>
+        <button id="stop">停止</button>
+        <button id="prev">上一步</button>
+        <button id="next">下一步</button>
+        <button id="reset">重置</button>
+        <button id="random">亂數陣列</button>
+    </div>
+    <div id="status">準備開始</div>
+
+    <script>
+        let array = [64, 34, 25, 12, 22, 11, 90];
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+
+        const container = document.getElementById('array-container');
+        const status = document.getElementById('status');
+
+        function renderArray(arr, comparingIndices = [], swappingIndices = [], sortedIndices = []) {
+            container.innerHTML = '';
+            arr.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${value * 3}px`;
+                bar.textContent = value;
+                if (comparingIndices.includes(index)) {
+                    bar.classList.add('comparing');
+                }
+                if (swappingIndices.includes(index)) {
+                    bar.classList.add('swapping');
+                }
+                if (sortedIndices.includes(index)) {
+                    bar.classList.add('sorted');
+                }
+                container.appendChild(bar);
+            });
+        }
+
+        function generateSteps(arr) {
+            steps = [];
+            const n = arr.length;
+            for (let i = 0; i < n - 1; i++) {
+                let minIndex = i;
+                for (let j = i + 1; j < n; j++) {
+                    steps.push({
+                        type: 'compare',
+                        i: i,
+                        j: j,
+                        minIndex: minIndex,
+                        array: [...arr],
+                        comparing: [minIndex, j],
+                        sorted: Array.from({length: i}, (_, idx) => idx)
+                    });
+                    if (arr[j] < arr[minIndex]) {
+                        minIndex = j;
+                    }
+                }
+                if (minIndex !== i) {
+                    [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+                    steps.push({
+                        type: 'swap',
+                        i: i,
+                        minIndex: minIndex,
+                        array: [...arr],
+                        swapping: [i, minIndex],
+                        sorted: Array.from({length: i}, (_, idx) => idx)
+                    });
+                } else {
+                    steps.push({
+                        type: 'no-swap',
+                        i: i,
+                        array: [...arr],
+                        sorted: Array.from({length: i + 1}, (_, idx) => idx)
+                    });
+                }
+            }
+            steps.push({
+                type: 'done',
+                array: [...arr],
+                sorted: Array.from({length: n}, (_, idx) => idx)
+            });
+        }
+
+        function updateDisplay() {
+            if (currentStep < steps.length) {
+                const step = steps[currentStep];
+                renderArray(step.array, step.comparing || [], step.swapping || [], step.sorted || []);
+                if (step.type === 'compare') {
+                    status.textContent = `比較索引 ${step.i} 和 ${step.j}`;
+                } else if (step.type === 'swap') {
+                    status.textContent = `交換索引 ${step.i} 和 ${step.minIndex}`;
+                } else if (step.type === 'no-swap') {
+                    status.textContent = `無需交換，索引 ${step.i} 已排序`;
+                } else if (step.type === 'done') {
+                    status.textContent = '排序完成';
+                }
+            }
+        }
+
+        function start() {
+            if (!isPlaying && currentStep < steps.length - 1) {
+                isPlaying = true;
+                intervalId = setInterval(() => {
+                    next();
+                    if (currentStep >= steps.length - 1) {
+                        stop();
+                    }
+                }, 1000);
+            }
+        }
+
+        function stop() {
+            isPlaying = false;
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        }
+
+        function next() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function prev() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function reset() {
+            stop();
+            currentStep = 0;
+            generateSteps([...array]);
+            updateDisplay();
+            status.textContent = '準備開始';
+        }
+
+        function randomArray() {
+            array = [];
+            for (let i = 0; i < 7; i++) {
+                array.push(Math.floor(Math.random() * 100) + 1);
+            }
+            reset();
+        }
+
+        // 初始化
+        generateSteps([...array]);
+        renderArray(array);
+
+        // 事件監聽器
+        document.getElementById('start').addEventListener('click', start);
+        document.getElementById('stop').addEventListener('click', stop);
+        document.getElementById('next').addEventListener('click', next);
+        document.getElementById('prev').addEventListener('click', prev);
+        document.getElementById('reset').addEventListener('click', reset);
+        document.getElementById('random').addEventListener('click', randomArray);
+    </script>
+</body>
+</html>
