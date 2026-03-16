@@ -3,11 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>首頁</title>
+    <title>排序算法示範首頁</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #444;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #666;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        }
+    </style>
 </head>
 <body>
-    <h1>歡迎</h1>
-    <p><a href="bubble-sort.html">前往 Bubble Sort 頁面</a></p>
-    <p><a href="selection-sort.html">前往 Selection Sort 頁面</a></p>
+    <div class="container">
+        <h1>排序算法示範</h1>
+        <div class="buttons">
+            <a href="bubble-sort.html" class="btn">前往 Bubble Sort 頁面</a>
+            <a href="selection-sort.html" class="btn">前往 Selection Sort 頁面</a>
+        </div>
+    </div>
 </body>
 </html>
