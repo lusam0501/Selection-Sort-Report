@@ -106,6 +106,7 @@
             <button id="prev">上一步</button>
             <button id="next">下一步</button>
             <button id="reset">重置</button>
+            <button id="setSize">設定數量</button>
             <button id="random">亂數陣列</button>
             <button id="home">回首頁</button>
         </div>
@@ -239,6 +240,19 @@
             reset();
         }
 
+        function setArraySize() {
+            const size = prompt("請輸入陣列元素數量 (1-20):");
+            if (size && !isNaN(size) && size > 0 && size <= 20) {
+                array = [];
+                for (let i = 0; i < size; i++) {
+                    array.push(Math.floor(Math.random() * 100) + 1);
+                }
+                reset();
+            } else {
+                alert("請輸入有效的數量 (1-20)。");
+            }
+        }
+
         // 初始化
         generateSteps([...array]);
         renderArray(array);
@@ -249,6 +263,7 @@
         document.getElementById('next').addEventListener('click', next);
         document.getElementById('prev').addEventListener('click', prev);
         document.getElementById('reset').addEventListener('click', reset);
+        document.getElementById('setSize').addEventListener('click', setArraySize);
         document.getElementById('random').addEventListener('click', randomArray);
         document.getElementById('home').addEventListener('click', () => {
             window.location.href = 'index.html';
