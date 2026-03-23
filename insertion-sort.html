@@ -154,7 +154,7 @@
                     i: i,
                     array: [...arr],
                     comparing: [i],
-                    sorted: Array.from({length: i}, (_, idx) => idx)
+                    sorted: []
                 });
                 while (j >= 0 && arr[j] > key) {
                     steps.push({
@@ -163,7 +163,7 @@
                         j: j,
                         array: [...arr],
                         comparing: [j, j+1],
-                        sorted: Array.from({length: i}, (_, idx) => idx)
+                        sorted: []
                     });
                     arr[j + 1] = arr[j];
                     steps.push({
@@ -172,7 +172,7 @@
                         j: j,
                         array: [...arr],
                         swapping: [j, j+1],
-                        sorted: Array.from({length: i}, (_, idx) => idx)
+                        sorted: []
                     });
                     j--;
                 }
