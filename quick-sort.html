@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+<meta charset="UTF-8">
+<title>Quick Sort 示範</title>
+<style>
+body {
+    font-family: 'Segoe UI';
+    background: #1a1a1a;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container {
+    background: rgba(0,0,0,0.8);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+}
+.array-container {
+    display: flex;
+    align-items: end;
+    height: 300px;
+    margin: 20px 0;
+}
+.bar {
+    width: 30px;
+    margin: 2px;
+    background: #666;
+    text-align: center;
+}
+.bar.pivot { background: orange; }
+.bar.compare { background: yellow; }
+.bar.swap { background: red; }
+.bar.sorted { background: green; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Quick Sort 示範</h1>
+    <div id="array" class="array-container"></div>
+    <button onclick="start()">開始</button>
+    <button onclick="next()">下一步</button>
+</div>
+
+<script>
+let array = [64, 34, 25, 12, 22, 11, 90];
+let steps = [];
+let currentStep = 0;
+
+const container = document.getElementById("array");
+
+function render(arr, pivot=-1, compare=[], swap=[], sorted=[]) {
+    container.innerHTML = "";
+    arr.forEach((v, i) => {
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        bar.style.height = v * 3 + "px";
+        bar.textContent = v;
+
+        if (i === pivot) bar.classList.add("pivot");
+        if (compare.includes(i)) bar.classList.add("compare");
+        if (swap.includes(i)) bar.classList.add("swap");
+        if (sorted.includes(i)) bar.classList.add("sorted");
+
+        container.appendChild(bar);
+    });
+}
+
+/* ===== Quick Sort ===== */
+
+function quickSort(arr, low, high) {
+    if (low < high) {
+        let pi = partition(arr, low, high);
+
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+function partition(arr, low, high) {
+    let pivot = arr[high];
+    let i = low - 1;
+
+    for (let j = low; j < high; j++) {
+        steps.push({
+            array: [...arr],
+            pivot: high,
+            compare: [j]
+        });
+
+        if (arr[j] < pivot) {
+            i++;
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+
+            steps.push({
+                array: [...arr],
+                pivot: high,
+                swap: [i, j]
+            });
+        }
+    }
+
+    [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+
+    steps.push({
+        array: [...arr],
+        pivot: i + 1,
+        sorted: [i + 1]
+    });
+
+    return i + 1;
+}
+
+/* ===== 控制 ===== */
+
+function generateSteps() {
+    let temp = [...array];
+    steps = [];
+
+    quickSort(temp, 0, temp.length - 1);
+
+    steps.push({
+        array: [...temp],
+        sorted: Array.from({length: temp.length}, (_, i) => i)
+    });
+}
+
+function next() {
+    if (currentStep < steps.length) {
+        let s = steps[currentStep];
+        render(
+            s.array,
+            s.pivot ?? -1,
+            s.compare || [],
+            s.swap || [],
+            s.sorted || []
+        );
+        currentStep++;
+    }
+}
+
+function start() {
+    currentStep = 0;
+    generateSteps();
+    next();
+}
+
+/* 初始化 */
+render(array);
+</script>
+
+</body>
+</html>
