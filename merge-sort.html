@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>插入排序法 Insertion Sort 視覺化教學</title>
+  <title>合併排序法 Merge Sort 視覺化教學</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -14,7 +14,8 @@
       --success: #22c55e;
       --warning: #facc15;
       --danger: #fb7185;
-      --insert: #a78bfa;
+      --merge: #a78bfa;
+      --split: #22d3ee;
       --border: rgba(255, 255, 255, 0.08);
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     }
@@ -262,33 +263,22 @@
       transform: translateY(-4px);
     }
 
-    .bar.shifting {
+    .bar.writing {
       background: linear-gradient(180deg, #fb7185, #e11d48);
       transform: translateY(-6px);
+    }
+
+    .bar.merging {
+      background: linear-gradient(180deg, #c084fc, #8b5cf6);
     }
 
     .bar.sorted {
       background: linear-gradient(180deg, #4ade80, #16a34a);
     }
 
-    .bar.key {
-      outline: 3px solid var(--insert);
+    .bar.active-range {
+      outline: 3px solid rgba(34, 211, 238, 0.85);
       outline-offset: -3px;
-      box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15), 0 8px 18px rgba(0,0,0,0.22);
-    }
-
-    .bar.key::after {
-      content: "key";
-      position: absolute;
-      top: -24px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.72rem;
-      font-weight: 800;
-      color: #ede9fe;
-      background: rgba(91, 33, 182, 0.9);
-      padding: 2px 8px;
-      border-radius: 999px;
     }
 
     .stats {
@@ -324,6 +314,39 @@
       font-size: 0.9rem;
     }
 
+    .range-info {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 720px) {
+      .range-info {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .range-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+
+    .range-card .title {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .range-card .value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      word-break: break-word;
+    }
+
     .log-box {
       margin-top: 16px;
       background: #0b1220;
@@ -355,10 +378,10 @@
       margin-right: 8px;
     }
 
+    .tag.split { background: rgba(34, 211, 238, 0.15); color: #a5f3fc; }
     .tag.compare { background: rgba(250, 204, 21, 0.16); color: #fde68a; }
-    .tag.shift { background: rgba(251, 113, 133, 0.15); color: #fecdd3; }
-    .tag.insert { background: rgba(167, 139, 250, 0.18); color: #ddd6fe; }
-    .tag.pass { background: rgba(34, 197, 94, 0.15); color: #bbf7d0; }
+    .tag.merge { background: rgba(167, 139, 250, 0.18); color: #ddd6fe; }
+    .tag.write { background: rgba(251, 113, 133, 0.15); color: #fecdd3; }
     .tag.done { background: rgba(56, 189, 248, 0.15); color: #bae6fd; }
 
     .footer-note {
@@ -372,62 +395,78 @@
   <div class="page">
     <section class="hero">
       <a class="home-link" href="index.html">← 回到首頁</a>
-      <h1>插入排序法 Insertion Sort</h1>
-      <p class="subtitle">互動式視覺化教學 — 原理 · 步驟 · 複雜度</p>
+      <h1>合併排序法 Merge Sort</h1>
+      <p class="subtitle">互動式視覺化教學 — 分割 · 合併 · 複雜度</p>
     </section>
 
     <div class="grid">
       <section class="card">
         <h2>一、操作原理</h2>
         <p>
-          插入排序法（Insertion Sort）的想法很像在整理手上的撲克牌。
-          我們會把陣列分成「已排序」與「未排序」兩部分，
-          每次從未排序區取出一個元素，插入到已排序區中的正確位置。
+          合併排序法（Merge Sort）採用的是「分而治之」（Divide and Conquer）策略。
+          它會先把陣列不斷對半切開，直到每個子陣列只剩下一個元素；
+          因為單一元素本身就是已排序的。
         </p>
         <p>
-          具體來說，從左到右掃描陣列，假設左側區間已經有序，
-          接著取出目前元素（key），再一路往左比較，
-          把比它大的元素往右移，直到找到適合插入的位置。
+          接著再把這些小陣列兩兩合併，在合併過程中比較左右兩邊目前最前面的元素，
+          每次把較小者放進結果陣列，直到完成整段排序。
         </p>
         <p>
-          它在資料量小或資料本來就接近排序完成時表現不錯，
-          也是很多進階排序法在小區間時常拿來搭配使用的基礎演算法。
+          Merge Sort 的時間複雜度穩定，無論最佳、平均或最壞情況都為 O(n log n)，
+          因此是很經典也很重要的排序演算法。
         </p>
 
         <h2>二、演算法偽代碼</h2>
-        <pre>function insertionSort(arr):
-  n = arr.length
-  for i = 1 to n - 1:
-    key = arr[i]
-    j = i - 1
+        <pre>function mergeSort(arr, left, right):
+  if left >= right:
+    return
 
-    while j >= 0 and arr[j] > key:
-      arr[j + 1] = arr[j]
-      j = j - 1
+  mid = floor((left + right) / 2)
 
-    arr[j + 1] = key</pre>
+  mergeSort(arr, left, mid)
+  mergeSort(arr, mid + 1, right)
+  merge(arr, left, mid, right)
+
+function merge(arr, left, mid, right):
+  leftPart = arr[left...mid]
+  rightPart = arr[mid+1...right]
+
+  i = 0
+  j = 0
+  k = left
+
+  while i < leftPart.length and j < rightPart.length:
+    if leftPart[i] <= rightPart[j]:
+      arr[k] = leftPart[i]
+      i++
+    else:
+      arr[k] = rightPart[j]
+      j++
+    k++
+
+  將剩餘元素依序放回 arr</pre>
 
         <h2>三、時間 &amp; 空間複雜度</h2>
         <div class="complexity-list">
           <div class="complexity-item">
-            <strong>最佳情況 (Best): O(n)</strong><br>
-            <span class="muted">陣列原本已接近排序好，每個元素只需少量比較。</span>
+            <strong>最佳情況 (Best): O(n log n)</strong><br>
+            <span class="muted">分割與合併流程固定，效率穩定。</span>
           </div>
           <div class="complexity-item">
-            <strong>平均情況 (Average): O(n²)</strong><br>
-            <span class="muted">通常每個元素都要往前比較並可能移動多次。</span>
+            <strong>平均情況 (Average): O(n log n)</strong><br>
+            <span class="muted">每層處理 n 個元素，共約 log n 層。</span>
           </div>
           <div class="complexity-item">
-            <strong>最壞情況 (Worst): O(n²)</strong><br>
-            <span class="muted">完全逆序時，每個元素都必須一路往前插入。</span>
+            <strong>最壞情況 (Worst): O(n log n)</strong><br>
+            <span class="muted">即使資料分布不好，仍維持穩定效率。</span>
           </div>
           <div class="complexity-item">
-            <strong>空間複雜度: O(1)</strong><br>
-            <span class="muted">屬於原地排序，只需常數額外空間。</span>
+            <strong>空間複雜度: O(n)</strong><br>
+            <span class="muted">需要額外陣列來儲存合併結果。</span>
           </div>
           <div class="complexity-item">
             <strong>穩定性: 穩定 ✓</strong><br>
-            <span class="muted">相等元素通常不會改變原本的相對順序。</span>
+            <span class="muted">相等元素可以保留原本的相對順序。</span>
           </div>
         </div>
       </section>
@@ -469,16 +508,31 @@
               <div class="stat-label">比較次數</div>
             </div>
             <div class="stat">
-              <div class="stat-value" id="shiftCount">0</div>
-              <div class="stat-label">位移次數</div>
+              <div class="stat-value" id="mergeCount">0</div>
+              <div class="stat-label">合併次數</div>
             </div>
             <div class="stat">
-              <div class="stat-value" id="passCount">0</div>
-              <div class="stat-label">已完成輪數</div>
+              <div class="stat-value" id="writeCount">0</div>
+              <div class="stat-label">寫回次數</div>
             </div>
             <div class="stat">
               <div class="stat-value" id="arraySize">0</div>
               <div class="stat-label">陣列大小 n</div>
+            </div>
+          </div>
+
+          <div class="range-info">
+            <div class="range-card">
+              <div class="title">目前處理區間</div>
+              <div class="value" id="rangeText">-</div>
+            </div>
+            <div class="range-card">
+              <div class="title">左半部</div>
+              <div class="value" id="leftText">-</div>
+            </div>
+            <div class="range-card">
+              <div class="title">右半部</div>
+              <div class="value" id="rightText">-</div>
             </div>
           </div>
         </div>
@@ -489,7 +543,7 @@
         </div>
 
         <div class="footer-note">
-          提示：黃色代表正在比較，紅色代表元素右移，紫色框代表目前要插入的 key，綠色代表已排序區間。
+          提示：黃色代表正在比較，紅色代表寫回原陣列，紫色代表目前正在合併的區段，青色框代表目前活躍區間，綠色代表排序完成。
         </div>
       </section>
     </div>
@@ -508,9 +562,12 @@
     const speedText = document.getElementById("speedText");
     const statusBox = document.getElementById("statusBox");
     const compareCountEl = document.getElementById("compareCount");
-    const shiftCountEl = document.getElementById("shiftCount");
-    const passCountEl = document.getElementById("passCount");
+    const mergeCountEl = document.getElementById("mergeCount");
+    const writeCountEl = document.getElementById("writeCount");
     const arraySizeEl = document.getElementById("arraySize");
+    const rangeTextEl = document.getElementById("rangeText");
+    const leftTextEl = document.getElementById("leftText");
+    const rightTextEl = document.getElementById("rightText");
     const logBox = document.getElementById("logBox");
 
     let originalArray = [64, 34, 25, 12, 22, 11, 90];
@@ -549,10 +606,10 @@
       div.className = "log-item";
 
       const tagMap = {
+        split: "分割",
         compare: "比較",
-        shift: "位移",
-        insert: "插入",
-        pass: "輪次",
+        merge: "合併",
+        write: "寫回",
         done: "完成"
       };
 
@@ -569,133 +626,255 @@
       logBox.innerHTML = `<div class="log-item muted">（此處將顯示每步操作記錄）</div>`;
     }
 
+    function createStep({
+      type,
+      array,
+      comparing = [],
+      writing = [],
+      merging = [],
+      activeRange = [],
+      leftRange = null,
+      rightRange = null,
+      compareCount = 0,
+      mergeCount = 0,
+      writeCount = 0,
+      status = "",
+      log = null
+    }) {
+      return {
+        type,
+        array: [...array],
+        comparing,
+        writing,
+        merging,
+        activeRange,
+        leftRange,
+        rightRange,
+        compareCount,
+        mergeCount,
+        writeCount,
+        status,
+        log
+      };
+    }
+
+    function rangeToArray(start, end) {
+      if (start == null || end == null || start > end) return [];
+      return Array.from({ length: end - start + 1 }, (_, idx) => start + idx);
+    }
+
+    function formatRange(arr, left, right) {
+      if (left == null || right == null || left > right) return "-";
+      return `[${left} ~ ${right}] → ${arr.slice(left, right + 1).join(", ")}`;
+    }
+
     function generateSteps(inputArr) {
       const arr = [...inputArr];
-      const n = arr.length;
       const result = [];
       let compareCount = 0;
-      let shiftCount = 0;
-      let completedPasses = 0;
+      let mergeCount = 0;
+      let writeCount = 0;
 
-      result.push({
+      result.push(createStep({
         type: "init",
-        array: [...arr],
-        comparing: [],
-        shifting: [],
-        sorted: [0],
-        keyIndex: null,
-        compareCount,
-        shiftCount,
-        completedPasses,
-        status: "請按「開始排序」或「單步執行」來觀察排序過程。",
-        log: null
-      });
+        array: arr,
+        status: "請按「開始排序」或「單步執行」來觀察排序過程。"
+      }));
 
-      for (let i = 1; i < n; i++) {
-        let key = arr[i];
-        let j = i - 1;
-
-        result.push({
-          type: "insert",
-          array: [...arr],
-          comparing: [],
-          shifting: [],
-          sorted: Array.from({ length: i }, (_, idx) => idx),
-          keyIndex: i,
-          compareCount,
-          shiftCount,
-          completedPasses,
-          status: `取出索引 ${i} 的值 ${key}，準備插入左側已排序區間。`,
-          log: `取出 key = ${key}，準備插入前面已排序區間。`
-        });
-
-        while (j >= 0) {
-          compareCount++;
-
-          result.push({
-            type: "compare",
-            array: [...arr],
-            comparing: [j, j + 1],
-            shifting: [],
-            sorted: Array.from({ length: i }, (_, idx) => idx),
-            keyIndex: j + 1,
-            compareCount,
-            shiftCount,
-            completedPasses,
-            status: `比較 arr[${j}] = ${arr[j]} 與 key = ${key}`,
-            log: `比較左側元素 ${arr[j]} 與 key ${key}。`
-          });
-
-          if (arr[j] > key) {
-            arr[j + 1] = arr[j];
-            shiftCount++;
-
-            result.push({
-              type: "shift",
-              array: [...arr],
-              comparing: [],
-              shifting: [j, j + 1],
-              sorted: Array.from({ length: i }, (_, idx) => idx),
-              keyIndex: j,
-              compareCount,
-              shiftCount,
-              completedPasses,
-              status: `${arr[j + 1]} 大於 ${key}，將它右移一格。`,
-              log: `元素 ${arr[j + 1]} 右移到索引 ${j + 1}。`
-            });
-
-            j--;
-          } else {
-            break;
-          }
+      function mergeSort(left, right) {
+        if (left >= right) {
+          result.push(createStep({
+            type: "split",
+            array: arr,
+            activeRange: rangeToArray(left, right),
+            leftRange: [left, right],
+            status: `區間 [${left}, ${right}] 只剩一個元素，視為已排序。`,
+            log: `區間 [${left}, ${right}] 不需再分割。`
+          }));
+          return;
         }
 
-        arr[j + 1] = key;
+        const mid = Math.floor((left + right) / 2);
 
-        result.push({
-          type: "insert",
-          array: [...arr],
-          comparing: [],
-          shifting: [],
-          sorted: Array.from({ length: i + 1 }, (_, idx) => idx),
-          keyIndex: j + 1,
-          compareCount,
-          shiftCount,
-          completedPasses,
-          status: `將 key = ${key} 插入索引 ${j + 1}。`,
-          log: `將 key ${key} 插入到索引 ${j + 1}，陣列變為：${arr.join(", ")}`
-        });
+        result.push(createStep({
+          type: "split",
+          array: arr,
+          activeRange: rangeToArray(left, right),
+          leftRange: [left, mid],
+          rightRange: [mid + 1, right],
+          status: `將區間 [${left}, ${right}] 分成 [${left}, ${mid}] 與 [${mid + 1}, ${right}]。`,
+          log: `分割區間 [${left}, ${right}]。`
+        }));
 
-        completedPasses++;
-
-        result.push({
-          type: "pass",
-          array: [...arr],
-          comparing: [],
-          shifting: [],
-          sorted: Array.from({ length: i + 1 }, (_, idx) => idx),
-          keyIndex: null,
-          compareCount,
-          shiftCount,
-          completedPasses,
-          status: `完成第 ${completedPasses} 輪，前面 ${i + 1} 個元素已排序完成。`,
-          log: `完成第 ${completedPasses} 輪插入，已排序區間擴大。`
-        });
+        mergeSort(left, mid);
+        mergeSort(mid + 1, right);
+        merge(left, mid, right);
       }
 
-      result.push({
+      function merge(left, mid, right) {
+        mergeCount++;
+
+        const leftPart = arr.slice(left, mid + 1);
+        const rightPart = arr.slice(mid + 1, right + 1);
+
+        result.push(createStep({
+          type: "merge",
+          array: arr,
+          merging: rangeToArray(left, right),
+          activeRange: rangeToArray(left, right),
+          leftRange: [left, mid],
+          rightRange: [mid + 1, right],
+          compareCount,
+          mergeCount,
+          writeCount,
+          status: `開始合併區間 [${left}, ${mid}] 與 [${mid + 1}, ${right}]。`,
+          log: `開始合併兩個已排序子陣列。`
+        }));
+
+        let i = 0;
+        let j = 0;
+        let k = left;
+
+        while (i < leftPart.length && j < rightPart.length) {
+          compareCount++;
+
+          const leftIndex = left + i;
+          const rightIndex = mid + 1 + j;
+
+          result.push(createStep({
+            type: "compare",
+            array: arr,
+            comparing: [leftIndex, rightIndex],
+            merging: rangeToArray(left, right),
+            activeRange: rangeToArray(left, right),
+            leftRange: [left, mid],
+            rightRange: [mid + 1, right],
+            compareCount,
+            mergeCount,
+            writeCount,
+            status: `比較左邊 ${leftPart[i]} 與右邊 ${rightPart[j]}。`,
+            log: `比較 ${leftPart[i]} 和 ${rightPart[j]}。`
+          }));
+
+          if (leftPart[i] <= rightPart[j]) {
+            arr[k] = leftPart[i];
+            writeCount++;
+
+            result.push(createStep({
+              type: "write",
+              array: arr,
+              writing: [k],
+              merging: rangeToArray(left, right),
+              activeRange: rangeToArray(left, right),
+              leftRange: [left, mid],
+              rightRange: [mid + 1, right],
+              compareCount,
+              mergeCount,
+              writeCount,
+              status: `將較小值 ${leftPart[i]} 寫回索引 ${k}。`,
+              log: `把 ${leftPart[i]} 放回原陣列位置 ${k}。`
+            }));
+
+            i++;
+          } else {
+            arr[k] = rightPart[j];
+            writeCount++;
+
+            result.push(createStep({
+              type: "write",
+              array: arr,
+              writing: [k],
+              merging: rangeToArray(left, right),
+              activeRange: rangeToArray(left, right),
+              leftRange: [left, mid],
+              rightRange: [mid + 1, right],
+              compareCount,
+              mergeCount,
+              writeCount,
+              status: `將較小值 ${rightPart[j]} 寫回索引 ${k}。`,
+              log: `把 ${rightPart[j]} 放回原陣列位置 ${k}。`
+            }));
+
+            j++;
+          }
+
+          k++;
+        }
+
+        while (i < leftPart.length) {
+          arr[k] = leftPart[i];
+          writeCount++;
+
+          result.push(createStep({
+            type: "write",
+            array: arr,
+            writing: [k],
+            merging: rangeToArray(left, right),
+            activeRange: rangeToArray(left, right),
+            leftRange: [left, mid],
+            rightRange: [mid + 1, right],
+            compareCount,
+            mergeCount,
+            writeCount,
+            status: `左半部尚有剩餘元素 ${leftPart[i]}，寫回索引 ${k}。`,
+            log: `左半部剩餘元素 ${leftPart[i]} 寫回位置 ${k}。`
+          }));
+
+          i++;
+          k++;
+        }
+
+        while (j < rightPart.length) {
+          arr[k] = rightPart[j];
+          writeCount++;
+
+          result.push(createStep({
+            type: "write",
+            array: arr,
+            writing: [k],
+            merging: rangeToArray(left, right),
+            activeRange: rangeToArray(left, right),
+            leftRange: [left, mid],
+            rightRange: [mid + 1, right],
+            compareCount,
+            mergeCount,
+            writeCount,
+            status: `右半部尚有剩餘元素 ${rightPart[j]}，寫回索引 ${k}。`,
+            log: `右半部剩餘元素 ${rightPart[j]} 寫回位置 ${k}。`
+          }));
+
+          j++;
+          k++;
+        }
+
+        result.push(createStep({
+          type: "merge",
+          array: arr,
+          merging: rangeToArray(left, right),
+          activeRange: rangeToArray(left, right),
+          leftRange: [left, mid],
+          rightRange: [mid + 1, right],
+          compareCount,
+          mergeCount,
+          writeCount,
+          status: `完成區間 [${left}, ${right}] 的合併。`,
+          log: `區間 [${left}, ${right}] 已完成排序與合併。`
+        }));
+      }
+
+      mergeSort(0, arr.length - 1);
+
+      result.push(createStep({
         type: "done",
-        array: [...arr],
-        comparing: [],
-        shifting: [],
-        sorted: Array.from({ length: n }, (_, idx) => idx),
-        keyIndex: null,
+        array: arr,
+        merging: rangeToArray(0, arr.length - 1),
+        activeRange: rangeToArray(0, arr.length - 1),
         compareCount,
-        shiftCount,
-        completedPasses,
+        mergeCount,
+        writeCount,
         status: "排序完成。",
         log: "所有排序步驟已完成。"
-      });
+      }));
 
       return result;
     }
@@ -717,14 +896,17 @@
         if (step.comparing.includes(index)) {
           bar.classList.add("comparing");
         }
-        if (step.shifting.includes(index)) {
-          bar.classList.add("shifting");
+        if (step.writing.includes(index)) {
+          bar.classList.add("writing");
         }
-        if (step.sorted.includes(index)) {
+        if (step.merging.includes(index)) {
+          bar.classList.add("merging");
+        }
+        if (step.activeRange.includes(index)) {
+          bar.classList.add("active-range");
+        }
+        if (step.type === "done") {
           bar.classList.add("sorted");
-        }
-        if (step.keyIndex === index && step.type !== "pass" && step.type !== "done") {
-          bar.classList.add("key");
         }
 
         const label = document.createElement("div");
@@ -738,11 +920,14 @@
     }
 
     function renderStats(step) {
-      compareCountEl.textContent = step.compareCount;
-      shiftCountEl.textContent = step.shiftCount;
-      passCountEl.textContent = step.completedPasses;
+      compareCountEl.textContent = step.compareCount || 0;
+      mergeCountEl.textContent = step.mergeCount || 0;
+      writeCountEl.textContent = step.writeCount || 0;
       arraySizeEl.textContent = step.array.length;
-      statusBox.textContent = step.status;
+      statusBox.textContent = step.status || "";
+      rangeTextEl.textContent = formatRange(step.array, step.activeRange[0], step.activeRange[step.activeRange.length - 1]);
+      leftTextEl.textContent = step.leftRange ? formatRange(step.array, step.leftRange[0], step.leftRange[1]) : "-";
+      rightTextEl.textContent = step.rightRange ? formatRange(step.array, step.rightRange[0], step.rightRange[1]) : "-";
     }
 
     function renderStep(index, fromNavigation = false) {
@@ -754,7 +939,13 @@
       renderStats(step);
 
       if (!fromNavigation && step.log) {
-        addLog(step.log, step.type);
+        const logType =
+          step.type === "write" ? "write" :
+          step.type === "merge" ? "merge" :
+          step.type === "compare" ? "compare" :
+          step.type === "done" ? "done" : "split";
+
+        addLog(step.log, logType);
       }
     }
 
@@ -791,7 +982,12 @@
 
         for (let i = 1; i <= currentStep; i++) {
           if (steps[i].log) {
-            addLog(steps[i].log, steps[i].type);
+            const logType =
+              steps[i].type === "write" ? "write" :
+              steps[i].type === "merge" ? "merge" :
+              steps[i].type === "compare" ? "compare" :
+              steps[i].type === "done" ? "done" : "split";
+            addLog(steps[i].log, logType);
           }
         }
 
