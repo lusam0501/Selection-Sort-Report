@@ -1,8 +1,8 @@
 # 排序報告
 
-學號: XXXXXX  
-姓名: Jia-Yin  
-模擬頁面: https://jia-yin.github.io/sort_report/
+學號: 11428128
+姓名: 呂秉憲 
+模擬頁面: https://lusam0501.github.io/Selection-Sort-Report/
 
 本報告整理了常見排序演算法的原理、時間與空間複雜度，以及模擬實作的觀察結果。  
 本次報告包含氣泡排序法、選擇排序法、插入排序法、合併排序法與快速排序法，最後再做綜合比較與學習心得整理。
